@@ -30,6 +30,14 @@ Add a `flake.nix` to your project with the following content:
 
 And run `devshell enter` or use the flake direnv integration described at: https://nixos.wiki/wiki/Flakes#Direnv_integration
 
+This is the basic `.envrc` that I use:
+
+```shell
+use flake
+
+layout ruby
+```
+
 ## Overriding default attributes
 
 The `devShell` args can be overriden with the default override mechanism. You can use all arguments defined by https://github.com/numtide/devshell `mkDevShell`.
