@@ -46,6 +46,6 @@ The `devShell` args can be overriden with the default override mechanism. You ca
   outputs = { self, flake-utils, dev-shells, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let inherit (dev-shells.lib) devShell;
-      in { devShell = (devShell system "ruby").override { env.DATABASE_URL = "postgres:///my_ruby_project"; } });
+      in { devShell = (devShell system "ruby").override { env.DATABASE_URL = "postgres:///my_ruby_project"; }; });
 }
 ```
