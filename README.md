@@ -39,10 +39,16 @@ Add a `flake.nix` to your project with the following content:
         devShell = pkgs.mkDevShell {
           imports = dev-shells.devshellModules."${system}";
 
+          # Enable linter support, this will trigger the installation of the `ruby.linter`.
           linter.enable = true;
+          # Enable language server support, this will trigger the installation of the `ruby.languageServer`.
           languageServer.enable = true;
 
+          # Enable ruby support
           ruby.enable = true;
+
+          # Add dependencies specific to Ruby on Rails applications.
+          ruby.rails.enable = true;
         }; 
       });
 }
