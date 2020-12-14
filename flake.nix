@@ -1,5 +1,5 @@
 {
-  description = "A very basic flake";
+  description = "A collection of devshell modules";
 
   inputs = { flake-utils.url = "github:numtide/flake-utils"; };
 
@@ -9,5 +9,5 @@
         inherit (nixpkgs) lib;
 
         pkgs = import nixpkgs { inherit system; };
-      in { devShellModules = import ./modules.nix { inherit pkgs lib; }; });
+      in { devshellModules = import ./modules.nix { inherit pkgs lib; }; });
 }

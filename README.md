@@ -23,12 +23,12 @@ Add a `flake.nix` to your project with the following content:
   description = "My ruby project";
 
   inputs = {
-    dev-shells.url = "github:pauldub/nix-dev-shells";
+    nix-dev-shells.url = "github:pauldub/nix-dev-shells/module-system";
     devshell.url = "github:numtide/devshell";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils, dev-shells, devshell, ... }:
+  outputs = { self, nixpkgs, flake-utils, nix-dev-shells, devshell, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
@@ -37,7 +37,7 @@ Add a `flake.nix` to your project with the following content:
         };
       in { 
         devShell = pkgs.mkDevShell {
-          imports = dev-shells.devShellModules."${system}";
+          imports = nix-dev-shells.devshellModules."${system}";
 
           # Enable linter support, this will trigger the installation of the `ruby.linter`.
           linter.enable = true;
