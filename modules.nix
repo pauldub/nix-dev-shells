@@ -1,12 +1,8 @@
 { pkgs, lib, ... }:
 
 [
-  ./modules/linter.nix
+  ./modules/tools.nix
   ./modules/ruby.nix
-  {
-    config = {
-      _module.args = {
-      };
-    };
-  }
+  ./modules/go.nix
+  ./modules/nix.nix
 ]

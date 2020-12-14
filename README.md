@@ -1,12 +1,18 @@
 # nix-dev-shells
 
-A flake that builds language specific devshell using https://github.com/numtide/devshell.
+A flake provides language specific [devshell](https://github.com/numtide/devshell) modules.
 
-## Available shells
+## Available devshell modules
 
-- ruby (latest) 
+- ruby 
 
 Ruby, bundler and dependencies to build common native extensions.
+
+- nix 
+
+Support installing rnix-lsp language server and nixfmt linter.
+
+- go 
 
 ## Usage
 
@@ -18,13 +24,27 @@ Add a `flake.nix` to your project with the following content:
 
   inputs = {
     dev-shells.url = "github:pauldub/nix-dev-shells";
+    devshell.url = "github:numtide/devshells";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, flake-utils, dev-shells, ... }:
+  outputs = { self, flake-utils, dev-shells, devshell, ... }:
     flake-utils.lib.eachDefaultSystem (system:
-      let inherit (dev-shells.lib) devShell;
-      in { devShell = (devShell system "ruby"); });
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ devshell.overlay ];
+        };
+      in { 
+        devShell = pkgs.mkDevShell {
+          imports = dev-shells.devshellModules."${system}";
+
+          linter.enable = true;
+          languageServer.enable = true;
+
+          ruby.enable = true;
+        }; 
+      });
 }
 ```
 
@@ -38,22 +58,3 @@ use flake
 layout ruby
 ```
 
-## Overriding default attributes
-
-The `devShell` args can be overriden with the default override mechanism. You can use all arguments defined by https://github.com/numtide/devshell `mkDevShell`.
-
-```nix
-{
-  description = "My ruby project";
-
-  inputs = {
-    dev-shells.url = "github:pauldub/nix-dev-shells";
-    flake-utils.url = "github:numtide/flake-utils";
-  };
-
-  outputs = { self, flake-utils, dev-shells, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let inherit (dev-shells.lib) devShell;
-      in { devShell = (devShell system "ruby").override { env.DATABASE_URL = "postgres:///my_ruby_project"; }; });
-}
-```

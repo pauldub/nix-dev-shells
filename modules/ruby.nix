@@ -2,82 +2,78 @@
 
 with lib;
 
-let
-  cfg = config.ruby;
+let cfg = config.ruby;
 in {
-  options.ruby = mkOption {
-    type = types.submodule {
-      options = {
-        enable = mkEnableOption "Enable ruby support";
+  options.ruby = {
+    enable = mkEnableOption "Enable ruby support";
 
-        nativeExtensions = mkEnableOption "Add support for building native extensions";
+    nativeExtensions =
+      mkEnableOption "Add support for building native extensions";
 
-        linter = mkOption {
-          type = types.package;
-          default = pkgs.rubyPackages.rubocop;
-        };
+    linter = mkOption {
+      type = types.package;
+      default = pkgs.rubocop;
+    };
 
-        package = mkOption {
-          type = types.package;
-          default = pkgs.ruby;
-        };
+    languageServer = mkOption {
+      type = types.package;
+      default = pkgs.solargraph;
+    };
 
-        bundler = mkOption {
-          type = types.package;
-          default = pkgs.bundler;
-        };
+    package = mkOption {
+      type = types.package;
+      default = pkgs.ruby;
+    };
 
-        rails = mkOption {
-          type = types.submodule {
-            options = {
-              enable = mkEnableOption "Enable Ruby on Rails support";
+    bundler = mkOption {
+      type = types.package;
+      default = pkgs.bundler;
+    };
 
-              nodejs = mkOption {
-                type = types.package;
-                default = pkgs.nodejs;
-              };
-            };
+    rails = mkOption {
+      type = types.submodule {
+        options = {
+          enable = mkEnableOption "Enable Ruby on Rails support";
+
+          nodejs = mkOption {
+            type = types.package;
+            default = pkgs.nodejs;
           };
         };
       };
     };
   };
 
-  config = 
-    let
-      enableNativeExtensions = cfg.nativeExtensions || cfg.rails.enable;
+  config = let
+    enableNativeExtensions = cfg.nativeExtensions || cfg.rails.enable;
 
-      nativeExtensionsPackages = with pkgs; if enableNativeExtensions then [
-        gcc
-        gnumake
-        pkgconfig
-      ] else [];
+    nativeExtensionsPackages = with pkgs; [ gcc gnumake pkgconfig ];
 
-      railsPackages = with pkgs; if cfg.rails.enable then [
-          cfg.rails.nodejs
+    railsPackages = with pkgs; [
+      cfg.rails.nodejs
 
-          # nokogiri 
-          libxml2.dev
-          libxslt.dev
-          zlib.dev
+      # nokogiri
+      libxml2.dev
+      libxslt.dev
+      zlib.dev
 
-          # ffi
-          libffi.dev
+      # ffi
+      libffi.dev
 
-          # postgresql
-          postgresql_11.lib
-      ] else [];
-    in
-      mkIf config.ruby.enable {
-        packages = [
-          (cfg.package.override {
-            bundler = cfg.bundler;
-          })
-          (mkIf config.linter.enable cfg.linter)
-        ] ++ railsPackages ++ nativeExtensionsPackages;
+      # postgresql
+      postgresql_11.lib
+    ];
+  in mkIf cfg.enable {
+    packages = lib.flatten [
+      (cfg.package.override { bundler = cfg.bundler; })
+      (mkIf config.linter.enable cfg.linter)
+      (mkIf config.languageServer.enable cfg.languageServer)
+      (mkIf enableNativeExtensions nativeExtensionsPackages)
+      (mkIf cfg.rails.enable railsPackages)
+    ];
 
-        bash.extra = mkIf enableNativeExtensions ''
-            export PKG_CONFIG_PATH="$DEVSHELL_DIR/lib/pkgconfig"
-        '';
-      };
+    bash.extra = mkIf enableNativeExtensions ''
+      export PKG_CONFIG_PATH="$DEVSHELL_DIR/lib/pkgconfig"
+    '';
+  };
 }
