@@ -38,7 +38,20 @@
               export PKG_CONFIG_PATH="$DEVSHELL_DIR/lib/pkgconfig"
             '';
           });
-      in { ruby = mkRubyShell pkgs.ruby pkgs.bundler; });
-    lib = { devShell = system: lang: shells."${lang}"."${system}"; };
+      in {
+        mkShell = configuration: let
+          shellModules = import ./modules.nix {
+            inherit pkgs lib;
+          };
+        in (lib.makeOverridable pkgs.mkDevShell {
+          imports = shellModules ++ [
+            configuration
+          ];
+        });
+
+        ruby = mkRubyShell pkgs.ruby pkgs.bundler; });
+    lib = {
+
+      devShell = system: lang: shells."${lang}"."${system}"; };
   };
 }
