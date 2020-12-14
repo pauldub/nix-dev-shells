@@ -47,29 +47,30 @@ in {
   config = let
     enableNativeExtensions = cfg.nativeExtensions || cfg.rails.enable;
 
-    nativeExtensionsPackages = with pkgs; [ gcc gnumake pkgconfig ];
+    nativeExtensionsPackages = with pkgs;
+      if enableNativeExtensions then [ gcc gnumake pkgconfig ] else [ ];
 
-    railsPackages = with pkgs; [
-      cfg.rails.nodejs
+    railsPackages = with pkgs;
+      if cfg.rails.enable then [
+        cfg.rails.nodejs
 
-      # nokogiri
-      libxml2.dev
-      libxslt.dev
-      zlib.dev
+        # nokogiri
+        libxml2.dev
+        libxslt.dev
+        zlib.dev
 
-      # ffi
-      libffi.dev
+        # ffi
+        libffi.dev
 
-      # postgresql
-      postgresql_11.lib
-    ];
+        # postgresql
+        postgresql_11.lib
+      ] else
+        [ ];
   in mkIf cfg.enable {
     packages = lib.flatten [
       (cfg.package.override { bundler = cfg.bundler; })
       (mkIf config.linter.enable cfg.linter)
       (mkIf config.languageServer.enable cfg.languageServer)
-      (mkIf enableNativeExtensions nativeExtensionsPackages)
-      (mkIf cfg.rails.enable railsPackages)
     ];
 
     bash.extra = mkIf enableNativeExtensions ''

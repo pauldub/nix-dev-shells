@@ -24,11 +24,11 @@ Add a `flake.nix` to your project with the following content:
 
   inputs = {
     dev-shells.url = "github:pauldub/nix-dev-shells";
-    devshell.url = "github:numtide/devshells";
+    devshell.url = "github:numtide/devshell";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, flake-utils, dev-shells, devshell, ... }:
+  outputs = { self, nixpkgs, flake-utils, dev-shells, devshell, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
@@ -37,7 +37,7 @@ Add a `flake.nix` to your project with the following content:
         };
       in { 
         devShell = pkgs.mkDevShell {
-          imports = dev-shells.devshellModules."${system}";
+          imports = dev-shells.devShellModules."${system}";
 
           # Enable linter support, this will trigger the installation of the `ruby.linter`.
           linter.enable = true;
