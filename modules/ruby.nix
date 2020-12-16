@@ -71,7 +71,7 @@ in {
       (cfg.package.override { bundler = cfg.bundler; })
       (mkIf config.linter.enable cfg.linter)
       (mkIf config.languageServer.enable cfg.languageServer)
-    ] ++ nativeExtentionsPackages ++ railsPackages;
+    ] ++ nativeExtensionsPackages ++ railsPackages;
 
     bash.extra = mkIf enableNativeExtensions ''
       export PKG_CONFIG_PATH="$DEVSHELL_DIR/lib/pkgconfig"
