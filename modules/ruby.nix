@@ -30,6 +30,11 @@ in {
       default = pkgs.bundler;
     };
 
+    postgresql = mkOption {
+      type = types.package;
+      default = pkgs.postgresql_11;
+    };
+
     rails = mkOption {
       type = types.submodule {
         options = {
@@ -48,10 +53,10 @@ in {
     enableNativeExtensions = cfg.nativeExtensions || cfg.rails.enable;
 
     nativeExtensionsPackages = with pkgs;
-      if enableNativeExtensions then [ gcc gnumake pkgconfig ] else [ ];
+      optionals enableNativeExtensions [ gcc gnumake pkgconfig ];
 
     railsPackages = with pkgs;
-      if cfg.rails.enable then [
+      optionals cfg.rails.enable [
         cfg.rails.nodejs
 
         # nokogiri
@@ -63,9 +68,9 @@ in {
         libffi.dev
 
         # postgresql
-        postgresql_11.lib
-      ] else
-        [ ];
+        cfg.postgresql
+        cfg.postgresql.lib
+      ];
   in mkIf cfg.enable {
     packages = lib.flatten [
       (cfg.package.override { bundler = cfg.bundler; })
